@@ -1,3 +1,5 @@
+local log = require("log")
+
 local SKIN = {}
 
 local ANALOG = graphics.newImage("textures/buttons/analog-outline.png")
@@ -196,7 +198,10 @@ local function drawButtons(buttons, controller)
 	end
 end
 
-function SKIN:Paint(controller)
+local function drawLiveController(controller)
+		-- this fuction is trivial for melee (just returns back x, y from game data I think)\
+	-- but for other games, it may do some math
+	-- So these are joystick x, y values, NOT x y cooredinates for center of joystick
 	local x, y = memory.game.translateJoyStick(controller.joystick.x, controller.joystick.y)
 
 	--[[if SETTINGS:IsDebugging() then
@@ -439,6 +444,21 @@ function SKIN:Paint(controller)
 	end
 
 	drawButtons(BUTTONS, controller)
+end
+
+local function drawInputHistory(controller)
+	-- TODO: compare to previous input values
+	-- if different (buttons changed, or timeout for joystick), draw input snapshot to canvas / image
+	-- draw canvas below live image, shift all other history canvases down
+
+	-- buttons are stored in a simple 32 bit mask, that should be easy to start with
+end
+
+function SKIN:Paint(controller)
+	-- Draw "live" controller input display at the top
+	drawLiveController(controller)
+  -- draw N history snapshots in rows below
+	drawInputHistory(controller)
 end
 
 overlay.registerSkin("History", SKIN)
