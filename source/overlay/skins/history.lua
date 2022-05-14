@@ -441,4 +441,4 @@ function SKIN:Paint(controller)
 	drawButtons(BUTTONS, controller)
 end
 
-overlay.registerSkin("Default", SKIN)
+overlay.registerSkin("History", SKIN)
