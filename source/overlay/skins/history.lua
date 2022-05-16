@@ -483,8 +483,8 @@ local function drawInputHistory(controller)
 
 	-- not sure why these canvases are not being drawn
 	for i, canvas in ipairs(history_canvases) do
-		log.error("drawing canvas" .. i)
-		graphics.easyDraw(tempcanvas, 0, i * 150)
+		-- log.error("drawing canvas" .. i)
+		graphics.easyDraw(canvas, 0, i * 150)
 	end
 
   previous_buttons = controller.buttons.pressed
