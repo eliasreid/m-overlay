@@ -446,12 +446,49 @@ local function drawLiveController(controller)
 	drawButtons(BUTTONS, controller)
 end
 
+-- store up to 10-ish canvases?
+local history_canvases = {}
+
+local previous_buttons
+
 local function drawInputHistory(controller)
 	-- TODO: compare to previous input values
 	-- if different (buttons changed, or timeout for joystick), draw input snapshot to canvas / image
 	-- draw canvas below live image, shift all other history canvases down
 
 	-- buttons are stored in a simple 32 bit mask, that should be easy to start with
+
+	  -- if(tempcanvas == nil)
+  -- then
+  --   tempcanvas = love.graphics.newCanvas()
+  --   graphics.setCanvas(tempcanvas)
+  --   graphics.easyDraw(BUTTON_TEXTURES.JOYSTICK.GATE_FILLED, 22, 52, 0, 128, 128)
+  --   graphics.setCanvas()
+  -- else
+  --   -- function graphics.easyDraw(obj, x, y, rotation, width, height, originX, originY, ...)
+  --   graphics.easyDraw(tempcanvas, 0, 100)
+  --   graphics.easyDraw(tempcanvas, 0, 200)
+  -- end
+	
+
+	-- WORKS
+	if previous_buttons ~= controller.buttons.pressed
+	then
+		log.error("buttons pressed changed")
+		history_canvases[#history_canvases+1] = love.graphics.newCanvas()
+		graphics.setCanvas(history_canvases[#history_canvases])
+		drawButtons(BUTTONS, controller)
+		graphics.setCanvas()
+	end
+
+	-- not sure why these canvases are not being drawn
+	for i, canvas in ipairs(history_canvases) do
+		log.error("drawing canvas" .. i)
+		graphics.easyDraw(tempcanvas, 0, i * 150)
+	end
+
+  previous_buttons = controller.buttons.pressed
+	
 end
 
 function SKIN:Paint(controller)
