@@ -451,6 +451,55 @@ local history_canvases = {}
 
 local previous_buttons
 
+local function drawHistoryRow(controller)
+	--drawButtons loops over buttons, because the texture tables have data such as 
+	--where to draw, etc.
+  -- in our case probably easier to unroll and just draw each individually
+  -- going to want to customize positions anyways
+
+	--left to right
+
+	--draw b button
+	-- graphics.setColor(BUTTON_TEXTURES.B.COLOR)
+	-- graphics.easyDraw(BUTTON_TEXTURES.B.PRESSED, 200, 92)
+
+	local height = 140
+	local xpos = 200
+
+	graphics.setColor(BUTTON_TEXTURES.B.COLOR)
+	graphics.easyDraw(BUTTON_TEXTURES.B.PRESSED, 
+									  xpos, height,
+										0,
+										BUTTON_TEXTURES.B.PRESSED:getWidth(),
+										BUTTON_TEXTURES.B.PRESSED:getHeight(),
+										0.5, 0.5)
+
+	xpos = xpos + 70
+	graphics.setColor(BUTTON_TEXTURES.A.COLOR)
+	graphics.easyDraw(BUTTON_TEXTURES.A.PRESSED, 
+										xpos, height,
+										0,
+										BUTTON_TEXTURES.A.PRESSED:getWidth() / 1.7,
+										BUTTON_TEXTURES.A.PRESSED:getHeight() / 1.7,
+										0.5, 0.5)
+  xpos = xpos + 60
+	graphics.setColor(BUTTON_TEXTURES.Y.COLOR)
+	graphics.easyDraw(BUTTON_TEXTURES.Y.PRESSED, 
+										xpos, height,
+										0,
+										BUTTON_TEXTURES.Y.PRESSED:getWidth() / 1.5,
+										BUTTON_TEXTURES.Y.PRESSED:getHeight() / 1.5,
+										0.5, 0.5)
+  xpos = xpos + 45
+	graphics.setColor(BUTTON_TEXTURES.X.COLOR)
+	graphics.easyDraw(BUTTON_TEXTURES.X.PRESSED, 
+										xpos, height,
+										0,
+										BUTTON_TEXTURES.X.PRESSED:getWidth() / 1.5,
+										BUTTON_TEXTURES.X.PRESSED:getHeight() / 1.5,
+										0.5, 0.5)
+end
+
 local function drawInputHistory(controller)
 	-- TODO: compare to previous input values
 	-- if different (buttons changed, or timeout for joystick), draw input snapshot to canvas / image
@@ -476,15 +525,19 @@ local function drawInputHistory(controller)
 	then
 		log.error("buttons pressed changed")
 		history_canvases[#history_canvases+1] = love.graphics.newCanvas()
+		-- graphics.setCanvas( {history_canvases[#history_canvases], stencil=true} )
 		graphics.setCanvas(history_canvases[#history_canvases])
-		drawButtons(BUTTONS, controller)
+
+		-- drawLiveController(controller)
+		-- drawButtons(BUTTONS, controller)
+		drawHistoryRow(controller)
 		graphics.setCanvas()
 	end
 
 	-- not sure why these canvases are not being drawn
 	for i, canvas in ipairs(history_canvases) do
 		-- log.error("drawing canvas" .. i)
-		graphics.easyDraw(canvas, 0, i * 150)
+		graphics.easyDraw(canvas, 0, i * 60)
 	end
 
   previous_buttons = controller.buttons.pressed
