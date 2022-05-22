@@ -446,8 +446,29 @@ local function drawLiveController(controller)
 	drawButtons(BUTTONS, controller)
 end
 
--- store up to 10-ish canvases?
-local history_canvases = {}
+-- 20 canvases for drawing history
+local history_canvases = {
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas(),
+	love.graphics.newCanvas()
+}
 
 local previous_buttons
 
@@ -459,89 +480,97 @@ local function drawHistoryRow(controller)
 
 	--left to right
 
-	--draw b button
-	-- graphics.setColor(BUTTON_TEXTURES.B.COLOR)
-	-- graphics.easyDraw(BUTTON_TEXTURES.B.PRESSED, 200, 92)
-
 	local height = 140
 	local xpos = 200
 
-	graphics.setColor(BUTTON_TEXTURES.B.COLOR)
-	graphics.easyDraw(BUTTON_TEXTURES.B.PRESSED, 
-									  xpos, height,
-										0,
-										BUTTON_TEXTURES.B.PRESSED:getWidth(),
-										BUTTON_TEXTURES.B.PRESSED:getHeight(),
-										0.5, 0.5)
+	if bit.band(controller.buttons.pressed, BUTTONS.B) == BUTTONS.B then
+		graphics.setColor(BUTTON_TEXTURES.B.COLOR)
+		graphics.easyDraw(BUTTON_TEXTURES.B.PRESSED, 
+		xpos, height,
+		0,
+		BUTTON_TEXTURES.B.PRESSED:getWidth(),
+		BUTTON_TEXTURES.B.PRESSED:getHeight(),
+		0.5, 0.5)
+	end
 
 	xpos = xpos + 70
-	graphics.setColor(BUTTON_TEXTURES.A.COLOR)
-	graphics.easyDraw(BUTTON_TEXTURES.A.PRESSED, 
-										xpos, height,
-										0,
-										BUTTON_TEXTURES.A.PRESSED:getWidth() / 1.7,
-										BUTTON_TEXTURES.A.PRESSED:getHeight() / 1.7,
-										0.5, 0.5)
+	if bit.band(controller.buttons.pressed, BUTTONS.A) == BUTTONS.A then
+		graphics.setColor(BUTTON_TEXTURES.A.COLOR)
+		graphics.easyDraw(BUTTON_TEXTURES.A.PRESSED, 
+											xpos, height,
+											0,
+											BUTTON_TEXTURES.A.PRESSED:getWidth() / 1.7,
+											BUTTON_TEXTURES.A.PRESSED:getHeight() / 1.7,
+											0.5, 0.5)
+	end
+
   xpos = xpos + 60
-	graphics.setColor(BUTTON_TEXTURES.Y.COLOR)
-	graphics.easyDraw(BUTTON_TEXTURES.Y.PRESSED, 
-										xpos, height,
-										0,
-										BUTTON_TEXTURES.Y.PRESSED:getWidth() / 1.5,
-										BUTTON_TEXTURES.Y.PRESSED:getHeight() / 1.5,
-										0.5, 0.5)
+	if bit.band(controller.buttons.pressed, BUTTONS.Y) == BUTTONS.Y then
+		graphics.setColor(BUTTON_TEXTURES.Y.COLOR)
+		graphics.easyDraw(BUTTON_TEXTURES.Y.PRESSED, 
+											xpos, height,
+											0,
+											BUTTON_TEXTURES.Y.PRESSED:getWidth() / 1.5,
+											BUTTON_TEXTURES.Y.PRESSED:getHeight() / 1.5,
+											0.5, 0.5)
+	end
   xpos = xpos + 45
-	graphics.setColor(BUTTON_TEXTURES.X.COLOR)
-	graphics.easyDraw(BUTTON_TEXTURES.X.PRESSED, 
-										xpos, height,
-										0,
-										BUTTON_TEXTURES.X.PRESSED:getWidth() / 1.5,
-										BUTTON_TEXTURES.X.PRESSED:getHeight() / 1.5,
-										0.5, 0.5)
+	if bit.band(controller.buttons.pressed, BUTTONS.X) == BUTTONS.X then
+		graphics.setColor(BUTTON_TEXTURES.X.COLOR)
+		graphics.easyDraw(BUTTON_TEXTURES.X.PRESSED, 
+											xpos, height,
+											0,
+											BUTTON_TEXTURES.X.PRESSED:getWidth() / 1.5,
+											BUTTON_TEXTURES.X.PRESSED:getHeight() / 1.5,
+											0.5, 0.5)
+	end
 end
 
+local history_index = 0
+local MAX_HISTORY = 20
+
 local function drawInputHistory(controller)
-	-- TODO: compare to previous input values
-	-- if different (buttons changed, or timeout for joystick), draw input snapshot to canvas / image
-	-- draw canvas below live image, shift all other history canvases down
-
-	-- buttons are stored in a simple 32 bit mask, that should be easy to start with
-
-	  -- if(tempcanvas == nil)
-  -- then
-  --   tempcanvas = love.graphics.newCanvas()
-  --   graphics.setCanvas(tempcanvas)
-  --   graphics.easyDraw(BUTTON_TEXTURES.JOYSTICK.GATE_FILLED, 22, 52, 0, 128, 128)
-  --   graphics.setCanvas()
-  -- else
-  --   -- function graphics.easyDraw(obj, x, y, rotation, width, height, originX, originY, ...)
-  --   graphics.easyDraw(tempcanvas, 0, 100)
-  --   graphics.easyDraw(tempcanvas, 0, 200)
-  -- end
 	
+	-- For now just checking if buttons.pressed has changed to determine whether to update
+	-- history
+	-- This may become much more complicated, if we want to check more analog things
+	-- (sticks, triggers)
 
-	-- WORKS
+	if previous_buttons == nil then
+		-- first time receiving buttons input, no history to draw
+		previous_buttons = controller.buttons.pressed
+		return
+	end
+
 	if previous_buttons ~= controller.buttons.pressed
 	then
-		log.error("buttons pressed changed")
-		history_canvases[#history_canvases+1] = love.graphics.newCanvas()
-		-- graphics.setCanvas( {history_canvases[#history_canvases], stencil=true} )
-		graphics.setCanvas(history_canvases[#history_canvases])
+		history_index = history_index + 1
+		if history_index > MAX_HISTORY then
+			history_index = 1
+		end
 
-		-- drawLiveController(controller)
-		-- drawButtons(BUTTONS, controller)
+		-- draw history row to canvas that we reuse to draw lower on screen as history scrolls
+		graphics.setCanvas(history_canvases[history_index])
+		graphics.clear(0, 0, 0, 0)
+
 		drawHistoryRow(controller)
+
+		-- reset canvas back to screen
 		graphics.setCanvas()
 	end
 
-	-- not sure why these canvases are not being drawn
+	-- draw each history canvas row shifted downward, from newest to oldest
 	for i, canvas in ipairs(history_canvases) do
-		-- log.error("drawing canvas" .. i)
-		graphics.easyDraw(canvas, 0, i * 60)
+		local ROW_HEIGHT = 60
+		local OFFSET = 60
+		local y_factor = ( history_index - i ) % MAX_HISTORY
+		local y = OFFSET + ROW_HEIGHT * y_factor
+
+		graphics.easyDraw(canvas, 0, y)
 	end
 
+	-- Save buttons state to compare next time function is called
   previous_buttons = controller.buttons.pressed
-	
 end
 
 function SKIN:Paint(controller)
