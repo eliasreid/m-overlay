@@ -73,7 +73,12 @@ local BUTTON_TEXTURES = {
 		POSITION = {
 			x = 12 + 64 + 256,
 			y = 48
-		}
+		},
+		HISTORY_OFFSET = {
+			x = 70,
+			y = 0
+		},
+		HISTORY_SCALE = 0.59
 	},
 	B = {
 		OUTLINE = graphics.newImage("textures/buttons/b-outline.png"),
@@ -83,7 +88,12 @@ local BUTTON_TEXTURES = {
 		POSITION = {
 			x = 16 + 256,
 			y = 92
-		}
+		},
+		HISTORY_OFFSET = {
+			x = 0,
+			y = 0
+		},
+		HISTORY_SCALE = 1
 	},
 	X = {
 		OUTLINE = graphics.newImage("textures/buttons/x-outline.png"),
@@ -93,7 +103,12 @@ local BUTTON_TEXTURES = {
 		POSITION = {
 			x = 138 + 256,
 			y = 32
-		}
+		},
+		HISTORY_OFFSET = {
+			x = 175,
+			y = 0
+		},
+		HISTORY_SCALE = 0.67
 	},
 	Y = {
 		OUTLINE = graphics.newImage("textures/buttons/y-outline.png"),
@@ -103,7 +118,12 @@ local BUTTON_TEXTURES = {
 		POSITION = {
 			x = 60 + 256,
 			y = -16
-		}
+		},
+		HISTORY_OFFSET = {
+			x = 130,
+			y = 0
+		},
+		HISTORY_SCALE = 0.67
 	},
 	Z = {
 		OUTLINE = graphics.newImage("textures/buttons/z-outline.png"),
@@ -113,7 +133,12 @@ local BUTTON_TEXTURES = {
 		POSITION = {
 			x = 128 + 256,
 			y = -32
-		}
+		},
+		HISTORY_OFFSET = {
+			x = 210,
+			y = 0
+		},
+		HISTORY_SCALE = 0.67 -- TODO: check good
 	},
 	START = {
 		OUTLINE = graphics.newImage("textures/buttons/start-outline.png"),
@@ -473,56 +498,26 @@ local history_canvases = {
 local previous_buttons
 
 local function drawHistoryRow(controller)
-	--drawButtons loops over buttons, because the texture tables have data such as 
-	--where to draw, etc.
-  -- in our case probably easier to unroll and just draw each individually
-  -- going to want to customize positions anyways
 
-	--left to right
-
-	local height = 140
-	local xpos = 200
-
-	if bit.band(controller.buttons.pressed, BUTTONS.B) == BUTTONS.B then
-		graphics.setColor(BUTTON_TEXTURES.B.COLOR)
-		graphics.easyDraw(BUTTON_TEXTURES.B.PRESSED, 
-		xpos, height,
-		0,
-		BUTTON_TEXTURES.B.PRESSED:getWidth(),
-		BUTTON_TEXTURES.B.PRESSED:getHeight(),
-		0.5, 0.5)
-	end
-
-	xpos = xpos + 70
-	if bit.band(controller.buttons.pressed, BUTTONS.A) == BUTTONS.A then
-		graphics.setColor(BUTTON_TEXTURES.A.COLOR)
-		graphics.easyDraw(BUTTON_TEXTURES.A.PRESSED, 
-											xpos, height,
-											0,
-											BUTTON_TEXTURES.A.PRESSED:getWidth() / 1.7,
-											BUTTON_TEXTURES.A.PRESSED:getHeight() / 1.7,
-											0.5, 0.5)
-	end
-
-  xpos = xpos + 60
-	if bit.band(controller.buttons.pressed, BUTTONS.Y) == BUTTONS.Y then
-		graphics.setColor(BUTTON_TEXTURES.Y.COLOR)
-		graphics.easyDraw(BUTTON_TEXTURES.Y.PRESSED, 
-											xpos, height,
-											0,
-											BUTTON_TEXTURES.Y.PRESSED:getWidth() / 1.5,
-											BUTTON_TEXTURES.Y.PRESSED:getHeight() / 1.5,
-											0.5, 0.5)
-	end
-  xpos = xpos + 45
-	if bit.band(controller.buttons.pressed, BUTTONS.X) == BUTTONS.X then
-		graphics.setColor(BUTTON_TEXTURES.X.COLOR)
-		graphics.easyDraw(BUTTON_TEXTURES.X.PRESSED, 
-											xpos, height,
-											0,
-											BUTTON_TEXTURES.X.PRESSED:getWidth() / 1.5,
-											BUTTON_TEXTURES.X.PRESSED:getHeight() / 1.5,
-											0.5, 0.5)
+	local HISTORY_X_START = 150
+	local HISTORY_Y_START = 140
+	
+	for button, flag in pairs(BUTTONS) do
+		local texture = BUTTON_TEXTURES[button]
+		if texture then
+			if button ~= "START" then
+				local offset = texture.HISTORY_OFFSET
+				graphics.setColor(texture.COLOR)
+				if bit.band(controller.buttons.pressed, flag) == flag then
+					graphics.easyDraw(texture.PRESSED,
+					  HISTORY_X_START + offset.x, HISTORY_Y_START + offset.y,
+						0,
+					  texture.PRESSED:getWidth() * texture.HISTORY_SCALE,
+						texture.PRESSED:getHeight() * texture.HISTORY_SCALE,
+					  0.5, 0.5)
+				end
+			end
+		end
 	end
 end
 
@@ -561,7 +556,7 @@ local function drawInputHistory(controller)
 
 	-- draw each history canvas row shifted downward, from newest to oldest
 	for i, canvas in ipairs(history_canvases) do
-		local ROW_HEIGHT = 60
+		local ROW_HEIGHT = 80
 		local OFFSET = 60
 		local y_factor = ( history_index - i ) % MAX_HISTORY
 		local y = OFFSET + ROW_HEIGHT * y_factor
